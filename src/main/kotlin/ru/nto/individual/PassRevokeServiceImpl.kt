@@ -1,11 +1,23 @@
-package ru.nto.individual
-
-import org.springframework.stereotype.Service
-import org.springframework.transaction.annotation.Transactional
-import java.time.Clock
-
 @Service
-class PassRevokeServiceImpl(private val passes: PassRepository, private val clock: Clock) : PassRevokeService {
+@RequiredArgsConstructor
+public class PassRevokeServiceImpl implements PassRevokeService {
+
+    private final PassRepository passRepository;
+    private final Clock clock;
+
+    @Override
     @Transactional
-    override fun revoke(passId: Long): PassRevokeDto = throw TaskNotImplementedException()
+    public PassRevokeDto revoke(Long passId) {
+        Pass pass = passRepository.findById(passId)
+                .orElseThrow(() -> new PassNotFoundException(passId));
+
+        if (pass.getRevokedAt() == null) {
+            LocalDateTime revokedAt = LocalDateTime.now(clock)
+                    .truncatedTo(ChronoUnit.SECONDS);
+            pass.setRevokedAt(revokedAt);
+            passRepository.save(pass);
+        }
+
+        return new PassRevokeDto(pass.getId(), pass.getRevokedAt());
+    }
 }
