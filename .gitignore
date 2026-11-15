@@ -1,7 +1,3 @@
-.gradle/
-**/build/
-.kotlin/
-
-# Ready libraries are part of the participant starter, not generated output.
-!libs/encoder-obf.jar
-!libs/verifier-obf.jar
+docker compose -f compose.yml up -d
+docker compose -f compose.yml exec -T postgres pg_isready -U nto -d nto_individual
+gradle bootRun
